@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/next"
+    }
+  ],
+  "env": {
+    "DATABASE_URL": "@database-url",
+    "DIRECT_URL": "@direct-url",
+    "ANTHROPIC_API_KEY": "@anthropic-api-key",
+    "OPENAI_API_KEY": "@openai-api-key",
+    "GITHUB_TOKEN": "@github-token",
+    "NEXTAUTH_SECRET": "@nextauth-secret",
+    "NEXTAUTH_URL": "@nextauth-url",
+    "REDIS_URL": "@redis-url"
+  },
+  "regions": ["iad1"],
+  "framework": "nextjs"
+}
