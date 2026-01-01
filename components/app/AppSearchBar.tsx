@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { motion } from 'framer-motion';
+import ApiKeyPrompt from './ApiKeyPrompt';
 
 interface AppSearchBarProps {
   onSearch: (url: string) => void;
@@ -13,6 +14,7 @@ export default function AppSearchBar({ onSearch, onRepoData }: AppSearchBarProps
   const [url, setUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showApiKeyPrompt, setShowApiKeyPrompt] = useState(false);
 
   const handleVerify = async () => {
     if (!url.trim()) {
@@ -20,13 +22,24 @@ export default function AppSearchBar({ onSearch, onRepoData }: AppSearchBarProps
       return;
     }
 
+    // Check for API key
+    const apiKey = localStorage.getItem('unrepo_research_key');
+    if (!apiKey) {
+      setShowApiKeyPrompt(true);
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      const response = await fetch('/api/github/analyze', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const response = await fetch(`${apiUrl}/api/v1/research`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-api-key': localStorage.getItem('unrepo_research_key') || ''
+        },
         body: JSON.stringify({ repoUrl: url }),
       });
 
@@ -84,6 +97,13 @@ export default function AppSearchBar({ onSearch, onRepoData }: AppSearchBarProps
           </motion.p>
         )}
       </div>
+      {showApiKeyPrompt && (
+        <ApiKeyPrompt
+          type="RESEARCH"
+          onKeySubmit={() => handleVerify()}
+          onClose={() => setShowApiKeyPrompt(false)}
+        />
+      )}
     </div>
   );
 }

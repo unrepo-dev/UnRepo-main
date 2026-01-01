@@ -1,0 +1,7 @@
+🚀 AI-Powered GitHub Repository Intelligence Platform
+
+UnRepo is a comprehensive platform that combines AI technology with blockchain integration to provide deep insights into GitHub repositories. Chat with repositories, analyze code quality, detect security issues, and access powerful APIs - all with Solana wallet integration and token-gated premium features.
+
+🤖 AI Chat | 🔬 Repository Analysis | 🔑 Developer APIs | 💎 Solana Integration
+
+Built with Next.js 16, TypeScript, Prisma, PostgreSQL (Neon), and Solana Web3.

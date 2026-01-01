@@ -32,8 +32,6 @@ export async function POST(request: NextRequest) {
           authMethod: 'SOLANA',
           isTokenHolder: true,
           tokenBalance: balance,
-          verifiedAt: new Date(),
-          paymentSignature: paymentSignature || null,
         },
       });
     } else {
@@ -43,8 +41,6 @@ export async function POST(request: NextRequest) {
         data: {
           isTokenHolder: true,
           tokenBalance: balance,
-          verifiedAt: new Date(),
-          paymentSignature: paymentSignature || null,
         },
       });
     }

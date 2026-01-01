@@ -31,7 +31,7 @@ export interface RepositoryData {
 }
 
 export interface FileNode {
-  name: string;
+  name?: string;
   path: string;
   type: 'file' | 'directory';
   children?: FileNode[];

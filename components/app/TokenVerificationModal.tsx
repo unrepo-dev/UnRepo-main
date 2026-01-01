@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { useX402Payment } from '@payai/x402-solana-react';
 import { formatUSDC, getExplorerUrl } from '@/lib/payment';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface TokenVerificationModalProps {
   isOpen: boolean;
@@ -26,13 +26,14 @@ export default function TokenVerificationModal({
   const { publicKey } = useWallet();
   const { connection } = useConnection();
   
-  const paymentConfig = {
-    amount: parseFloat(process.env.NEXT_PUBLIC_PAYAI_AMOUNT || '0.01'),
-    currency: 'USDC' as const,
-    network: 'mainnet' as const,
-  };
+  // Temporarily disabled payment integration
+  // const paymentConfig = {
+  //   amount: parseFloat(process.env.NEXT_PUBLIC_PAYAI_AMOUNT || '0.01'),
+  //   currency: 'USDC' as const,
+  //   network: 'mainnet' as const,
+  // };
   
-  const { initiatePayment, paymentStatus, error: paymentError } = useX402Payment(paymentConfig);
+  // const { initiatePayment, paymentStatus, error: paymentError } = useX402Payment(paymentConfig);
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -50,67 +51,72 @@ export default function TokenVerificationModal({
     setStep('payment');
 
     try {
+      // Payment integration temporarily disabled
+      setError('Payment integration is currently being updated. Please try again later.');
+      setLoading(false);
+      return;
+      
       // Initiate payment via Pay-AI
-      const result = await initiatePayment({
-        description: 'UnRepo Chat Limit Increase',
-        metadata: {
-          walletAddress: publicKey.toBase58(),
-          feature: 'unlimited_chat',
-        },
-      });
+      // const result = await initiatePayment({
+      //   description: 'UnRepo Chat Limit Increase',
+      //   metadata: {
+      //     walletAddress: publicKey.toBase58(),
+      //     feature: 'unlimited_chat',
+      //   },
+      // });
 
-      if (!result || !result.signature) {
-        throw new Error('Failed to create payment');
-      }
+      // if (!result || !result.signature) {
+      //   throw new Error('Failed to create payment');
+      // }
 
-      setTransactionSignature(result.signature);
-      setStep('verifying');
+      // setTransactionSignature(result.signature);
+      // setStep('verifying');
 
       // Wait for transaction confirmation and verify on backend
-      setTimeout(async () => {
-        try {
-          const response = await fetch('/api/payment/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              walletAddress: publicKey.toBase58(),
-              transactionHash: result.signature,
-            }),
-          });
+      // setTimeout(async () => {
+      //   try {
+      //     const response = await fetch('/api/payment/verify', {
+      //       method: 'POST',
+      //       headers: { 'Content-Type': 'application/json' },
+      //       body: JSON.stringify({
+      //         walletAddress: publicKey.toBase58(),
+      //         transactionHash: result.signature,
+      //       }),
+      //     });
 
-          const data = await response.json();
+      //     const data = await response.json();
 
-          if (!response.ok) {
-            throw new Error(data.error || 'Payment verification failed');
-          }
+      //     if (!response.ok) {
+      //       throw new Error(data.error || 'Payment verification failed');
+      //     }
 
-          if (data.data.verified) {
-            setStep('success');
-            toast.success('Payment verified! Chat limit increased.');
+      //     if (data.data.verified) {
+      //       setStep('success');
+      //       toast.success('Payment verified! Chat limit increased.');
             
-            if (onVerify) {
-              await onVerify(publicKey.toBase58());
-            }
+      //       if (onVerify) {
+      //         await onVerify(publicKey.toBase58());
+      //       }
 
-            setTimeout(() => {
-              onClose();
-              resetModal();
-            }, 2000);
-          } else {
-            throw new Error('Payment verification failed');
-          }
-        } catch (err: any) {
-          console.error('Payment verification error:', err);
-          setError(err.message || 'Failed to verify payment');
-          setStep('info');
-        } finally {
-          setLoading(false);
-        }
-      }, 3000);
+      //       setTimeout(() => {
+      //         onClose();
+      //         resetModal();
+      //       }, 2000);
+      //     } else {
+      //       throw new Error('Payment verification failed');
+      //     }
+      //   } catch (err: any) {
+      //     console.error('Payment verification error:', err);
+      //     setError(err.message || 'Failed to verify payment');
+      //     setStep('info');
+      //   } finally {
+      //     setLoading(false);
+      //   }
+      // }, 3000);
 
     } catch (err: any) {
       console.error('Payment error:', err);
-      setError(err.message || paymentError || 'Payment failed');
+      setError(err.message || 'Payment failed');
       setStep('info');
       setLoading(false);
     }

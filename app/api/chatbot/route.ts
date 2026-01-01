@@ -64,11 +64,12 @@ export async function POST(request: NextRequest) {
     }
 
     let user;
+    let apiKeyData = null;
 
     if (apiKey) {
       // API key authentication
-      const key = await verifyApiKey(apiKey);
-      user = key.user;
+      apiKeyData = await verifyApiKey(apiKey);
+      user = apiKeyData.user;
     } else if (session) {
       // Session authentication - use the ID from session
       const userId = (session.user as any).id;
@@ -217,16 +218,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Log API usage
-    await prisma.apiUsage.create({
-      data: {
-        userId: key.userId,
-        apiKeyId: key.id,
-        endpoint: '/api/chatbot',
-        method: 'POST',
-        requestData: { repoUrl, format },
-      },
-    });
+    // Log API usage (only if using API key)
+    if (apiKeyData) {
+      await prisma.apiUsage.create({
+        data: {
+          userId: apiKeyData.userId,
+          apiKeyId: apiKeyData.id,
+          endpoint: '/api/chatbot',
+          method: 'POST',
+          requestData: JSON.stringify({ repoUrl, format }),
+        },
+      });
+    }
 
     // Format response based on requested format
     if (format === 'compact') {
@@ -248,7 +251,6 @@ export async function POST(request: NextRequest) {
           stars: repoData.stars,
           forks: repoData.forks,
           branch: repoData.branch,
-          updatedAt: repoData.updatedAt,
         },
         languages,
         fileTree: fileTree.children,

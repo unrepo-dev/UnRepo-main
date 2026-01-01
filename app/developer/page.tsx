@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Copy, Eye, EyeOff, Key, TrendingUp, Clock, AlertCircle } from 'lucide-react';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { useTheme } from '@/contexts/ThemeContext';
 import { getCardClasses, getCodeBlockClasses, getTextClasses, getAlertClasses, getHoverClasses } from '@/lib/themeUtils';
 
@@ -33,7 +35,6 @@ export default function DeveloperPortal() {
   const { theme } = useTheme();
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [usage, setUsage] = useState<ApiUsage[]>([]);
-  const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
@@ -51,24 +52,30 @@ export default function DeveloperPortal() {
 
   const fetchApiKeys = async () => {
     try {
-      const res = await fetch('/api/keys/generate');
+      // Fetch from API server
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const email = session?.user?.email || 'anonymous@unrepo.dev';
+      
+      const res = await fetch(`${apiUrl}/api/keys?email=${email}`);
       const data = await res.json();
+      
       if (data.success) {
-        setApiKeys(data.data.keys || []);
+        setApiKeys(data.data || []);
       }
     } catch (error) {
       console.error('Failed to fetch API keys:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const fetchUsageStats = async () => {
     try {
-      const res = await fetch('/api/keys/usage');
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const email = session?.user?.email || 'anonymous@unrepo.dev';
+      
+      const res = await fetch(`${apiUrl}/api/keys/usage?email=${email}`);
       const data = await res.json();
       if (data.success) {
-        setUsage(data.data.usage || []);
+        setUsage(data.data || []);
       }
     } catch (error) {
       console.error('Failed to fetch usage stats:', error);
@@ -98,20 +105,30 @@ export default function DeveloperPortal() {
     setGenerating(true);
     
     try {
-      const res = await fetch('/api/keys/generate', {
+      // Call the separate API server
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const res = await fetch(`${apiUrl}/api/keys/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: selectedApiType, name: apiName }),
+        body: JSON.stringify({ 
+          type: selectedApiType, 
+          name: apiName,
+          email: session?.user?.email || 'anonymous@unrepo.dev'
+        }),
       });
       
       const data = await res.json();
       
       if (data.success) {
+        // Store API key in localStorage
+        const storageKey = selectedApiType === 'CHATBOT' ? 'unrepo_chatbot_key' : 'unrepo_research_key';
+        localStorage.setItem(storageKey, data.data.apiKey);
+        
         await fetchApiKeys();
         closeApiModal();
-        alert('API key generated successfully!');
+        alert(`✅ API key generated successfully!\n\n🔑 Key: ${data.data.apiKey}\n\n⚠️ This key has been saved to your browser and will be used automatically.\n\n💾 Save this key somewhere safe - it won't be shown again!`);
       } else {
-        alert(data.message || 'Failed to generate API key');
+        alert(data.error || 'Failed to generate API key');
         setGenerating(false);
       }
     } catch (error) {
@@ -136,34 +153,65 @@ export default function DeveloperPortal() {
     return key.substring(0, 20) + '•'.repeat(key.length - 20);
   };
 
-  if (status === 'loading' || loading) {
+  if (status === 'loading') {
     return (
-      <div className={`min-h-screen p-8 animate-fadeIn ${
+      <>
+      <Navbar />
+      <div className={`min-h-screen p-8 pt-24 animate-fadeIn ${
         theme === 'dark' ? 'bg-black text-white' : 'bg-white text-gray-900'
       }`}>
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="animate-spin h-8 w-8 border-4 border-red-600 border-t-transparent rounded-full" />
         </div>
       </div>
+      <Footer />
+      </>
     );
   }
 
   if (!session) {
     return (
-      <div className={`min-h-screen p-8 animate-fadeIn ${
+      <>
+      <Navbar />
+      <div className={`min-h-screen p-8 pt-24 animate-fadeIn ${
         theme === 'dark' ? 'bg-black text-white' : 'bg-white text-gray-900'
       }`}>
         <div className="max-w-4xl mx-auto">
-          <div className={`border rounded-lg p-6 flex items-start gap-3 animate-slideUp ${
+          <div className="mb-8 animate-slideDown">
+            <h1 className="text-4xl font-bold mb-2 text-red-500">Developer Portal</h1>
+            <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+              Manage your API keys and monitor usage for UnRepo APIs
+            </p>
+          </div>
+          
+          <div className={`border rounded-lg p-8 animate-slideUp ${
             theme === 'dark' ? 'bg-red-900/20 border-red-900' : 'bg-red-50 border-red-200'
           }`}>
-            <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
-            <p className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>
-              Please sign in to access the developer portal.
-            </p>
+            <div className="flex items-start gap-3 mb-6">
+              <AlertCircle className="h-6 w-6 text-red-500 mt-0.5 flex-shrink-0" />
+              <div>
+                <h2 className="text-xl font-bold mb-2 text-red-500">Authentication Required</h2>
+                <p className={`mb-4 ${
+                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                }`}>
+                  You need to sign in to generate and manage API keys. Sign in with your GitHub account to get started.
+                </p>
+                <a 
+                  href="/"
+                  className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all duration-200 hover:scale-105 active:scale-95 font-semibold"
+                >
+                  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                  </svg>
+                  Sign in with GitHub
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      <Footer />
+      </>
     );
   }
 
@@ -171,7 +219,9 @@ export default function DeveloperPortal() {
   const chatbotKey = apiKeys.find(k => k.type === 'CHATBOT');
 
   return (
-    <div className={`min-h-screen p-8 animate-fadeIn ${
+    <>
+    <Navbar />
+    <div className={`min-h-screen p-8 pt-24 animate-fadeIn ${
       theme === 'dark' ? 'bg-black text-white' : 'bg-white text-gray-900'
     }`}>
       <div className="max-w-6xl mx-auto">
@@ -575,5 +625,7 @@ export default function DeveloperPortal() {
         </div>
       )}
     </div>
+    <Footer />
+    </>
   );
 }

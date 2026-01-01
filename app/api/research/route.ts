@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
         apiKeyId: key.id,
         endpoint: '/api/research',
         method: 'POST',
-        requestData: { repoUrl },
+        requestData: JSON.stringify({ repoUrl }),
       },
     });
 

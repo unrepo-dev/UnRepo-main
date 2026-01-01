@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { useWallet } from '@solana/wallet-adapter-react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
@@ -16,25 +15,10 @@ export default function LandingPage() {
   const { theme } = useTheme();
   const { data: session, status } = useSession();
   const { connected } = useWallet();
-  const router = useRouter();
   
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // Redirect authenticated users to /app
-  useEffect(() => {
-    if (status === 'authenticated' && session) {
-      router.push('/app');
-    }
-  }, [session, status, router]);
-
-  // Also redirect if wallet is connected
-  useEffect(() => {
-    if (connected) {
-      router.push('/app');
-    }
-  }, [connected, router]);
 
   if (!mounted) {
     return (

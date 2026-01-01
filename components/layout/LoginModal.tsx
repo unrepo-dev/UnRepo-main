@@ -49,12 +49,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   const handleGithubLogin = async () => {
     try {
-      // Redirect to GitHub auth with explicit redirect
+      // Sign in with GitHub and stay on current page
       await signIn('github', { 
-        callbackUrl: '/app',
+        callbackUrl: window.location.pathname || '/',
         redirect: true 
       });
-      // Modal will close automatically when redirecting
+      // Modal will close automatically after successful auth
+      onClose();
     } catch (error) {
       console.error('GitHub login error:', error);
       setError('Failed to initiate GitHub login');

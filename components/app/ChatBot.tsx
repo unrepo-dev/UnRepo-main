@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
+import ApiKeyPrompt from './ApiKeyPrompt';
 
 interface ChatBotProps {
   repoData: any;
@@ -25,6 +26,7 @@ export default function ChatBot({ repoData, initialContext, isGitHubAuth }: Chat
   const [loading, setLoading] = useState(false);
   const [placeholder, setPlaceholder] = useState(placeholders[0]);
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [showApiKeyPrompt, setShowApiKeyPrompt] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Add initial context message when chat opens
@@ -64,6 +66,13 @@ export default function ChatBot({ repoData, initialContext, isGitHubAuth }: Chat
       return;
     }
 
+    // Check for API key
+    const apiKey = localStorage.getItem('unrepo_chatbot_key');
+    if (!apiKey) {
+      setShowApiKeyPrompt(true);
+      return;
+    }
+
     const userMessage = input.trim();
     setInput('');
     setMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
@@ -76,14 +85,17 @@ export default function ChatBot({ repoData, initialContext, isGitHubAuth }: Chat
         content: initialContext.content.substring(0, 2000), // Limit context size
       } : null;
 
-      const response = await fetch('/api/chatbot', {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const response = await fetch(`${apiUrl}/api/v1/chatbot`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-api-key': localStorage.getItem('unrepo_chatbot_key') || ''
+        },
         body: JSON.stringify({
           message: userMessage,
           repoUrl: repoData?.repo?.url || '',
           context,
-          sessionId: 'session-' + Date.now(),
         }),
       });
 
@@ -185,6 +197,14 @@ export default function ChatBot({ repoData, initialContext, isGitHubAuth }: Chat
           </motion.button>
         </div>
       </div>
+
+      {showApiKeyPrompt && (
+        <ApiKeyPrompt
+          type="CHATBOT"
+          onKeySubmit={() => handleSend()}
+          onClose={() => setShowApiKeyPrompt(false)}
+        />
+      )}
     </div>
   );
 }

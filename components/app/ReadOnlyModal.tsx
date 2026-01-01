@@ -78,7 +78,7 @@ export default function ReadOnlyModal({ isOpen, onClose }: ReadOnlyModalProps) {
 
                   <div className="pt-4">
                     <button
-                      onClick={() => signIn('github', { callbackUrl: '/app' })}
+                      onClick={() => signIn('github', { callbackUrl: window.location.pathname })}
                       className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold transition flex items-center justify-center gap-2"
                     >
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">

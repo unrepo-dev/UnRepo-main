@@ -65,16 +65,16 @@ export default function Navbar() {
               </Link>
               
               <div className="hidden md:flex space-x-6">
-                <Link href="/#features" className={`transition ${
+                <a href="/#features" className={`transition cursor-pointer ${
                   theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                 }`}>
                   Features
-                </Link>
-                <Link href="/#how-it-works" className={`transition ${
+                </a>
+                <a href="/#how-it-works" className={`transition cursor-pointer ${
                   theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                 }`}>
                   How It Works
-                </Link>
+                </a>
                 <Link href="/app" className={`transition ${
                   theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                 }`}>

@@ -1,17 +1,21 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import { useTheme } from '@/contexts/ThemeContext';
 import { getCardClasses, getCodeBlockClasses, getTextClasses, getAlertClasses } from '@/lib/themeUtils';
 
 export default function ApiDocsPage() {
   const { theme } = useTheme();
   return (
+    <>
+    <Navbar />
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
-      className={`min-h-screen ${
+      className={`min-h-screen pt-16 ${
         theme === 'dark' ? 'bg-black text-white' : 'bg-white text-gray-900'
       }`}
     >
@@ -415,5 +419,7 @@ X-RateLimit-Reset: 1640995200`}
         </motion.section>
       </div>
     </motion.div>
+    <Footer />
+    </>
   );
 }

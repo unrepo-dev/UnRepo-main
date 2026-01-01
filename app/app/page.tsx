@@ -5,6 +5,8 @@ import { useSession, signOut } from 'next-auth/react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import Navbar from '@/components/layout/Navbar';
+import Footer from '@/components/layout/Footer';
 import AppSearchBar from '@/components/app/AppSearchBar';
 import FileTree from '@/components/app/FileTree';
 import CodePanel from '@/components/app/CodePanel';
@@ -39,51 +41,9 @@ export default function AppPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* App Navbar */}
-      <motion.nav 
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="border-b border-red-900/30 bg-black backdrop-blur-sm sticky top-0 z-40"
-      >
-        <div className="max-w-full px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-red-600 rounded-lg"></div>
-              <span className="text-xl font-bold text-red-500">UnRepo</span>
-            </Link>
-
-            <div className="flex items-center space-x-4">
-              {isGitHubAuth && session?.user && (
-                <div className="flex items-center space-x-3">
-                  <span className="text-sm text-gray-500">GitHub: {session.user.name || session.user.email}</span>
-                  {session.user.image && (
-                    <img src={session.user.image} alt="Profile" className="w-8 h-8 rounded-full border border-red-900/30" />
-                  )}
-                </div>
-              )}
-              
-              {isSolanaAuth && publicKey && (
-                <div className="flex items-center space-x-2">
-                  <div className="px-3 py-1 bg-red-950/20 border border-red-900/30 rounded-lg text-sm text-red-500">
-                    View Only Mode
-                  </div>
-                  <div className="px-3 py-1 bg-zinc-900 border border-red-900/20 rounded-lg text-sm text-gray-400">
-                    {publicKey.toBase58().slice(0, 4)}...{publicKey.toBase58().slice(-4)}
-                  </div>
-                </div>
-              )}
-              
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-zinc-900 hover:bg-red-950 border border-red-900/30 hover:border-red-800 text-red-500 rounded-lg text-sm transition-all"
-              >
-                Logout
-              </button>
-            </div>
-          </div>
-        </div>
-      </motion.nav>
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-black pt-16">
 
       {/* Main Content */}
       <div className="max-w-full px-6 py-6">
@@ -199,5 +159,7 @@ export default function AppPage() {
         )}
       </AnimatePresence>
     </div>
+    <Footer />
+    </>
   );
 }
