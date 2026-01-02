@@ -4,9 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "postinstall": "prisma generate",
     "test:apis": "tsx test-production-apis.ts",
     "setup:keys": "tsx setup-api-keys.ts",
     "test:flow": "tsx test-free-tier.ts"
