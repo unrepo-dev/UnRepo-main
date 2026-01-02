@@ -75,11 +75,22 @@ export default function Navbar() {
                 }`}>
                   How It Works
                 </a>
-                <Link href="/app" className={`transition ${
-                  theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
-                }`}>
-                  Our App
-                </Link>
+                {isAuthenticated ? (
+                  <Link href="/app" className={`transition ${
+                    theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                  }`}>
+                    Our App
+                  </Link>
+                ) : (
+                  <button 
+                    onClick={() => setShowLoginModal(true)}
+                    className={`transition ${
+                      theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Our App
+                  </button>
+                )}
                 <Link href="/api-docs" className={`transition ${
                   theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
                 }`}>
